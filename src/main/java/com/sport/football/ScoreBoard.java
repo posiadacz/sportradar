@@ -35,10 +35,15 @@ public class ScoreBoard {
         return this;
     }
 
-    public Stream<Match> getMatchInProgressSummary() {
+    public Stream<Match> getMatchesInProgressSorted() {
         return persistence
                 .getAll()
                 .stream()
                 .sorted(totalScoreAndDateComparator);
+    }
+
+    public String printMatchInProgressSummary(ScoreBoardPrinter printer) {
+        Stream<Match> matches = getMatchesInProgressSorted();
+        return printer.printMatches(matches);
     }
 }

@@ -42,15 +42,15 @@ class ScoreBoardTest {
     @Test
     @DisplayName("Should add, update score and generate summary")
     public void shouldAddUpdateSummary() {
-        Match mexicoCanada = new Match(MEXICO, CANADA);
-        Match spainBrazil = new Match(SPAIN, BRAZIL);
-        Match finishedMatch = new Match(AUSTRALIA, MEXICO);
-        Match germanyFrance = new Match(GERMANY, FRANCE);
-        Match uruguayItaly = new Match(URUGUAY, ITALY);
-        Match argentinaAustralia = new Match(ARGENTINA, AUSTRALIA);
+        Match mexicoCanada = Match.start(MEXICO, CANADA);
+        Match spainBrazil = Match.start(SPAIN, BRAZIL);
+        Match finishedMatch = Match.start(AUSTRALIA, MEXICO);
+        Match germanyFrance = Match.start(GERMANY, FRANCE);
+        Match uruguayItaly = Match.start(URUGUAY, ITALY);
+        Match argentinaAustralia = Match.start(ARGENTINA, AUSTRALIA);
 
         MatchPersistence persistence = new MatchPersistence();
-        Stream<Match> summary = new ScoreBoard(persistence)
+        ScoreBoard scoreBoard = new ScoreBoard(persistence)
                 .addMatch(mexicoCanada)
                 .addMatch(spainBrazil)
                 .addMatch(germanyFrance)
@@ -63,11 +63,12 @@ class ScoreBoardTest {
                 .updateMatchScore(germanyFrance, 2, 2)
                 .finishMatch(finishedMatch)
                 .updateMatchScore(uruguayItaly, 6, 6)
-                .updateMatchScore(argentinaAustralia, 3, 1)
-                .getMatchInProgressSummary();
-        List<Match> summaryMatchesList = summary.toList();
+                .updateMatchScore(argentinaAustralia, 3, 1);
 
-        assertEquals(5, summaryMatchesList.size());
+        Stream<Match> matchesInProgress = scoreBoard.getMatchesInProgressSorted();
+        List<Match> matchesInProgressList = matchesInProgress.toList();
+
+        assertEquals(5, matchesInProgressList.size());
         assertEquals(Stream.of(
                                 uruguayItaly,
                                 spainBrazil,
@@ -75,7 +76,14 @@ class ScoreBoardTest {
                                 argentinaAustralia,
                                 germanyFrance)
                         .toList(),
-                summaryMatchesList);
+                matchesInProgressList);
+        assertEquals("""
+                        1 Uruguay 6 - Italy 6
+                        2 Spain 10 - Brazil 2
+                        3 Mexico 0 - Canada 5
+                        4 Argentina 3 - Australia 1
+                        5 Germany 2 - France 2""",
+                scoreBoard.printMatchInProgressSummary(new ScoreBoardPrinter()));
     }
 
     @Test
