@@ -1,29 +1,44 @@
 package com.sport.football;
 
-import java.util.List;
+import com.sport.football.match.Match;
+import com.sport.football.match.MatchPersistence;
+
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 public class ScoreBoard {
 
-    private final ScoreBoardPersistence persistence;
+    private final MatchPersistence persistence;
 
-    public ScoreBoard(ScoreBoardPersistence persistence) {
+    private final Comparator<Match> totalScoreComparator = Comparator.comparingInt(Match::getTotalScore).reversed();
+    private final Comparator<Match> startDateComparator = Comparator.comparing(Match::getStartTimestamp).reversed();
+    private final Comparator<Match> totalScoreAndDateComparator = totalScoreComparator.thenComparing(startDateComparator);
+
+    public ScoreBoard(MatchPersistence persistence) {
         this.persistence = persistence;
     }
 
-    public void addNewMatch(Match match) {
+    public ScoreBoard addMatch(Match match) {
         persistence.add(match);
+        return this;
     }
 
-    public void updateMatchScore(Match match) {
-
+    public ScoreBoard updateMatchScore(Match match,
+                                       int homeTeamScore,
+                                       int awayTeamScore) {
+        match.setScore(homeTeamScore, awayTeamScore);
+        return this;
     }
 
-    public void finishMatch(Match match) {
-
+    public ScoreBoard finishMatch(Match match) {
+        persistence.delete(match);
+        return this;
     }
 
-    public List<Match> getMatchInProgressSummary() {
-        return null;
+    public Stream<Match> getMatchInProgressSummary() {
+        return persistence
+                .getAll()
+                .stream()
+                .sorted(totalScoreAndDateComparator);
     }
-
 }
