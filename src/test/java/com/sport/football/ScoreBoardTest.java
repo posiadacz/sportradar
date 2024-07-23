@@ -5,6 +5,9 @@ import com.sport.football.match.MatchPersistence;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -22,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class ScoreBoardTest {
 
@@ -98,4 +102,46 @@ class ScoreBoardTest {
                 .setScore(5, 2);
     }
 
+    @Test
+    @DisplayName("Should sort matches by total score and start date")
+    public void shouldSortByScoreDate() {
+        MatchPersistence persistence = mock(MatchPersistence.class);
+        ScoreBoard scoreBoard = new ScoreBoard(persistence);
+
+        Instant startTime = Instant.now().minus(3, ChronoUnit.HOURS);
+
+        Match match1 = mock(Match.class);
+        when(match1.getTotalScore())
+                .thenReturn(10);
+        when(match1.getStartTimestamp())
+                .thenReturn(startTime);
+
+        Match match2 = mock(Match.class);
+        when(match2.getTotalScore())
+                .thenReturn(3);
+        when(match2.getStartTimestamp())
+                .thenReturn(startTime.plus(90, ChronoUnit.MINUTES));
+
+        Match match3 = mock(Match.class);
+        when(match3.getTotalScore())
+                .thenReturn(3);
+        when(match3.getStartTimestamp())
+                .thenReturn(startTime);
+
+        Match match4 = mock(Match.class);
+        when(match4.getTotalScore())
+                .thenReturn(1);
+        when(match4.getStartTimestamp())
+                .thenReturn(startTime);
+
+        when(persistence.getAll())
+                .thenReturn(Arrays.asList(match4, match3, match2, match1));
+
+        List<Match> matchesSorted = scoreBoard.getMatchesInProgressSorted().toList();
+
+        assertEquals(
+                Arrays.asList(match1, match2, match3, match4),
+                matchesSorted
+        );
+    }
 }
