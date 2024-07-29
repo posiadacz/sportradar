@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -143,5 +144,17 @@ class ScoreBoardTest {
                 Arrays.asList(match1, match2, match3, match4),
                 matchesSorted
         );
+    }
+
+    @Test
+    @DisplayName("Should generate summary of empty matches list")
+    public void shouldGenerateSummaryOfEmptyMatchesList() {
+        MatchPersistence persistence = mock(MatchPersistence.class);
+        when(persistence.getAll())
+                .thenReturn(Collections.emptyList());
+
+        ScoreBoard scoreBoard = new ScoreBoard(persistence);
+
+        assertEquals("", scoreBoard.printMatchInProgressSummary(new ScoreBoardPrinter()));
     }
 }

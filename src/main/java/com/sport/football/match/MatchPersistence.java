@@ -19,7 +19,8 @@ public class MatchPersistence {
         return storage;
     }
 
-    public void delete(Match match) {
+    public MatchPersistence delete(Match match) {
         storage.remove(match);
+        return this;
     }
 }
