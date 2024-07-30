@@ -11,13 +11,17 @@ import static org.junit.jupiter.api.Assertions.*;
 class MatchTest {
 
     @Test
-    @DisplayName("Should start match with current time")
-    public void shouldStartMatchWithCurrentTime() {
+    @DisplayName("Should start match with current time and 0 score")
+    public void shouldStartMatch() {
         Instant now = Instant.now().minusMillis(1);
         Match match = Match.start(FootballTeam.MEXICO, FootballTeam.AUSTRALIA);
         assertTrue(match
                 .getStartTimestamp()
                 .isAfter(now));
+
+        assertEquals(0, match.getTotalScore());
+        assertEquals(0, match.getHomeTeamScore());
+        assertEquals(0, match.getAwayTeamScore());
     }
 
     @Test
